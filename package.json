@@ -1,6 +1,6 @@
 {
-  "name": "angular-mario",
-  "version": "0.0.0",
+  "name": "angular-plataformas",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

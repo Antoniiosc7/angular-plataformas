@@ -1,0 +1,6 @@
+<div class="map">
+  <app-character [position]="characterPosition"></app-character>
+  <app-enemy *ngFor="let enemy of enemies" [position]="enemy.position"></app-enemy>
+  <app-platform *ngFor="let platform of platforms" [position]="platform.position"></app-platform>
+  <app-platform *ngFor="let block of blocks" [position]="block.position"></app-platform>
+</div>

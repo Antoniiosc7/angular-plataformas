@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-mario": {
+    "angular-plataformas": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/angular-mario",
+            "outputPath": "dist/angular-plataformas",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -59,10 +59,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-mario:build:production"
+              "buildTarget": "angular-plataformas:build:production"
             },
             "development": {
-              "buildTarget": "angular-mario:build:development"
+              "buildTarget": "angular-plataformas:build:development"
             }
           },
           "defaultConfiguration": "development"
