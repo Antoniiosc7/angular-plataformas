@@ -3,6 +3,7 @@ import {MapComponent} from "../map/map.component";
 import {GameOverPopupComponent} from "../../components/game-over-popup/game-over-popup.component";
 import { MatDialog } from '@angular/material/dialog';
 import { System, Box, Circle } from 'detect-collisions';
+import {PausePopupComponent} from "../../components/pause-popup/pause-popup.component";
 
 @Component({
   selector: 'app-game',
@@ -21,8 +22,13 @@ export class GameComponent implements OnInit {
   groundLevel = 0; // Nivel del suelo
   gameSpeed = 5; // Velocidad del movimiento del mapa
   mapOffset = 0; // Desplazamiento del mapa
-  isGameOver = false; // Estado del juego
   score = 0; // Puntuación del juego
+  private isPaused = false;
+  private isGameOver = false;
+  private gravityInterval: any;
+  private mapInterval: any;
+  private spawnInterval: any;
+  private scoreInterval: any;
 
   platforms: { position: { x: number, y: number } }[] = [];
   blocks: { position: { x: number, y: number } }[] = [];
@@ -35,7 +41,8 @@ export class GameComponent implements OnInit {
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog) {
+    private dialog: MatDialog)
+  {
     this.collisionSystem = new System();
   }
 
@@ -71,16 +78,44 @@ export class GameComponent implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp') {
+    if (event.key === 'ArrowUp' || event.key === 'Space') {
       this.jump();
+    } else if (event.key === 'Escape') {
+      this.pauseGame();
+
     }
     this.cdr.detectChanges(); // Forzar detección de cambios
   }
 
+  pauseGame() {
+    this.isPaused = true;
+
+    clearInterval(this.gravityInterval);
+    clearInterval(this.mapInterval);
+    clearInterval(this.spawnInterval);
+    clearInterval(this.scoreInterval);
+
+
+    const dialogRef = this.dialog.open(PausePopupComponent);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'resume') {
+        this.isPaused = false;
+        this.applyGravity();
+        this.moveMap();
+        this.spawnElements();
+        this.updateScore();
+      } else if (result === 'end') {
+        this.isGameOver = true;
+        this.dialog.open(GameOverPopupComponent);
+      }
+    });
+  }
+
   applyGravity() {
-    const gravityInterval = setInterval(() => {
-      if (this.isGameOver) {
-        clearInterval(gravityInterval);
+    this.gravityInterval = setInterval(() => {
+      if (this.isGameOver || this.isPaused) {
+        clearInterval(this.gravityInterval);
         return;
       }
 
@@ -112,9 +147,9 @@ export class GameComponent implements OnInit {
   }
 
   moveMap() {
-    const mapInterval = setInterval(() => {
-      if (this.isGameOver) {
-        clearInterval(mapInterval);
+    this.mapInterval = setInterval(() => {
+      if (this.isGameOver || this.isPaused) {
+        clearInterval(this.mapInterval);
         return;
       }
 
@@ -153,9 +188,9 @@ export class GameComponent implements OnInit {
   }
 
   spawnElements() {
-    const spawnInterval = setInterval(() => {
-      if (this.isGameOver) {
-        clearInterval(spawnInterval);
+    this.spawnInterval = setInterval(() => {
+      if (this.isGameOver || this.isPaused) {
+        clearInterval(this.spawnInterval);
         return;
       }
 
@@ -228,9 +263,9 @@ export class GameComponent implements OnInit {
   }
 
   updateScore() {
-    const scoreInterval = setInterval(() => {
-      if (this.isGameOver) {
-        clearInterval(scoreInterval);
+    this.scoreInterval = setInterval(() => {
+      if (this.isGameOver || this.isPaused) {
+        clearInterval(this.scoreInterval);
         return;
       }
       this.score++;
