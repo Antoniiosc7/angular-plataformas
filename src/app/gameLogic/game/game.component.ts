@@ -1,5 +1,7 @@
 import {ChangeDetectorRef, Component, HostListener, OnInit} from '@angular/core';
 import {MapComponent} from "../map/map.component";
+import {GameOverPopupComponent} from "../../components/game-over-popup/game-over-popup.component";
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-game',
@@ -8,52 +10,62 @@ import {MapComponent} from "../map/map.component";
     MapComponent
   ],
   templateUrl: './game.component.html',
-  styleUrl: './game.component.css'
+  styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit {
-  characterPosition = { x: 50, y: 100 };
+  characterPosition = { x: 200, y: 100 }; // Posición centrada del personaje
   gravity = 1;
   velocityY = 0; // Velocidad vertical
   isJumping = false;
   groundLevel = 0; // Nivel del suelo
   gameSpeed = 5; // Velocidad del movimiento del mapa
   mapOffset = 0; // Desplazamiento del mapa
+  isGameOver = false; // Estado del juego
+  score = 0; // Puntuación del juego
 
-  platforms = [
-    { position: { x: 0, y: 50 } },
-    { position: { x: 150, y: 150 } },
-    { position: { x: 300, y: 100 } }
-  ];
-
+  platforms: { position: { x: number, y: number } }[] = [];
   blocks: { position: { x: number, y: number } }[] = [];
   enemies: { position: { x: number, y: number } }[] = [];
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog) {}
 
   ngOnInit() {
-    this.applyGravity(); // Comenzar a aplicar la gravedad
-    this.moveMap(); // Comenzar a mover el mapa
-    this.spawnElements(); // Generar bloques y enemigos periódicamente
+    this.startGame();
+  }
+
+  startGame() {
+    this.isGameOver = false;
+    this.characterPosition = { x: 200, y: 100 };
+    this.velocityY = 0;
+    this.isJumping = false;
+    this.mapOffset = 0;
+    this.score = 0; // Reiniciar la puntuación
+    this.platforms = [];
+    this.blocks = [];
+    this.enemies = [];
+    this.applyGravity();
+    this.spawnElements();
+    this.moveMap();
+    this.updateScore(); // Comenzar a actualizar la puntuación
   }
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    switch (event.key) {
-      case 'ArrowLeft':
-        this.moveLeft();
-        break;
-      case 'ArrowRight':
-        this.moveRight();
-        break;
-      case 'ArrowUp':
-        this.jump();
-        break;
+    if (event.key === 'ArrowUp') {
+      this.jump();
     }
     this.cdr.detectChanges(); // Forzar detección de cambios
   }
 
   applyGravity() {
-    setInterval(() => {
+    const gravityInterval = setInterval(() => {
+      if (this.isGameOver) {
+        clearInterval(gravityInterval);
+        return;
+      }
+
       if (this.isJumping || this.characterPosition.y > this.groundLevel) {
         this.velocityY -= this.gravity;
         this.characterPosition.y += this.velocityY;
@@ -70,26 +82,20 @@ export class GameComponent implements OnInit {
     }, 20); // Actualizar la posición cada 20ms
   }
 
-  moveLeft() {
-    this.characterPosition.x -= 10;
-    this.checkCollision();
-  }
-
-  moveRight() {
-    this.characterPosition.x += 10;
-    this.checkCollision();
-  }
-
   jump() {
-    this.characterPosition.y += 50;
-    setTimeout(() => {
-      this.characterPosition.y -= this.gravity;
-      this.checkCollision();
-    }, 200);
+    if (!this.isJumping) {
+      this.velocityY = 15; // Velocidad de salto inicial
+      this.isJumping = true;
+    }
   }
 
   moveMap() {
-    setInterval(() => {
+    const mapInterval = setInterval(() => {
+      if (this.isGameOver) {
+        clearInterval(mapInterval);
+        return;
+      }
+
       this.mapOffset += this.gameSpeed;
 
       // Mover plataformas, bloques y enemigos
@@ -110,36 +116,32 @@ export class GameComponent implements OnInit {
       this.blocks = this.blocks.filter(block => block.position.x + 50 > 0);
       this.enemies = this.enemies.filter(enemy => enemy.position.x + 50 > 0);
 
+      this.cdr.detectChanges(); // Actualizar la vista
     }, 20); // Velocidad del movimiento del mapa
   }
 
-  canPlaceBlock(x: number, y: number): boolean {
-    if (y === 0) return true;
-    return this.blocks.some(block =>
-      (block.position.x === x && block.position.y === y - 1) || // Below
-      (block.position.x === x && block.position.y === y + 1) || // Above
-      (block.position.x === x - 1 && block.position.y === y) || // Left
-      (block.position.x === x + 1 && block.position.y === y)    // Right
-    );
-  }
-
   spawnElements() {
-    setInterval(() => {
-      // Generar una plataforma aleatoria
+    const spawnInterval = setInterval(() => {
+      if (this.isGameOver) {
+        clearInterval(spawnInterval);
+        return;
+      }
+
       const randomY = Math.floor(Math.random() * 150) + 50; // Posición aleatoria en el eje Y
-      this.platforms.push({ position: { x: 600, y: randomY } });
+
+      // Generar una plataforma aleatoria
+      this.platforms.push({ position: { x: 800, y: randomY } });
 
       // Generar un enemigo aleatorio
       const enemyY = Math.floor(Math.random() * 150) + 50; // Posición aleatoria en el eje Y
       this.enemies.push({ position: { x: 800, y: enemyY } });
 
-      // Generar un bloque en el suelo
-      const blockX = 600;
-      const blockY = Math.floor(Math.random() * 5); // Altura entre 0 y 4
-      if (this.canPlaceBlock(blockX, blockY)) {
-        this.blocks.push({ position: { x: blockX, y: blockY } });
-      }
+      // Generar un bloque en una posición aleatoria
+      const blockX = 800;
+      const blockY = Math.floor(Math.random() * 100); // Altura aleatoria
+      this.blocks.push({ position: { x: blockX, y: blockY } });
 
+      this.cdr.detectChanges(); // Actualizar la vista
     }, 2000); // Intervalo para la generación de bloques y enemigos (2 segundos)
   }
 
@@ -181,9 +183,24 @@ export class GameComponent implements OnInit {
         this.characterPosition.x + 50 > enemyX &&
         this.characterPosition.y < enemyY + 50 &&
         this.characterPosition.y + 50 > enemyY) {
-        // Aquí podrías implementar la lógica de colisión (por ejemplo, perder vida, reiniciar el nivel, etc.)
-        console.log('Colisión con enemigo!');
+        this.isGameOver = true;
+        this.dialog.open(GameOverPopupComponent);
       }
     });
+  }
+
+  updateScore() {
+    const scoreInterval = setInterval(() => {
+      if (this.isGameOver) {
+        clearInterval(scoreInterval);
+        return;
+      }
+      this.score++;
+      this.cdr.detectChanges(); // Actualizar la vista
+    }, 1000); // Incrementar la puntuación cada segundo
+  }
+
+  resetGame() {
+    this.startGame();
   }
 }

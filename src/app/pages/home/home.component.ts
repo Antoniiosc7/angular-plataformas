@@ -14,7 +14,10 @@ import {Router} from "@angular/router";
 export class HomeComponent {
   constructor(private router: Router) {}
 
-  onPlay() {
+  startGame() {
+    this.router.navigate(['/play']);
+  }
+  goToOptions() {
     this.router.navigate(['/play']);
   }
 }
