@@ -4,6 +4,6 @@
   height: 50px;
   background-color: red; /* O usa una imagen de Mario */
   position: absolute; /* Esto es crucial para que se mueva */
-  background-image: url('/assets/mario.png');
+  /*background-image: url('/assets/mario.png');*/
   background-size: cover;
 }
