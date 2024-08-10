@@ -1,11 +1,13 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { NgStyle } from '@angular/common';
 
 @Component({
   selector: 'app-coin',
   standalone: true,
-  template: '',
+  template: '<div class="coin" [ngStyle]="{ left: position.x + \'px\', bottom: position.y + \'px\' }"></div>',
+  imports: [NgStyle],
   styles: [`
-    :host {
+    .coin {
       width: 20px;
       height: 20px;
       background-color: yellow;

@@ -28,6 +28,7 @@ export class GameComponent implements OnInit {
   blocks: { position: { x: number, y: number } }[] = [];
   enemies: { position: { x: number, y: number } }[] = [];
   circularEnemies: { position: { x: number, y: number } }[] = [];
+  coins: { position: { x: number, y: number } }[] = [];
 
   private collisionSystem: System;
   private characterBody!: Box;
@@ -60,6 +61,7 @@ export class GameComponent implements OnInit {
     this.blocks = [];
     this.enemies = [];
     this.circularEnemies = [];
+    this.coins = [];
     this.characterBody = this.collisionSystem.createBox(this.characterPosition, 50, 50);
     this.applyGravity();
     this.spawnElements();
@@ -135,17 +137,20 @@ export class GameComponent implements OnInit {
         enemy.position.x -= this.gameSpeed;
       });
 
+      this.coins.forEach(coin => {
+        coin.position.x -= this.gameSpeed;
+      });
+
       // Eliminar plataformas, bloques y enemigos que salieron de la pantalla
       this.platforms = this.platforms.filter(platform => platform.position.x + 100 > 0);
       this.blocks = this.blocks.filter(block => block.position.x + 50 > 0);
       this.enemies = this.enemies.filter(enemy => enemy.position.x + 50 > 0);
       this.circularEnemies = this.circularEnemies.filter(enemy => enemy.position.x + 50 > 0);
+      this.coins = this.coins.filter(coin => coin.position.x + 20 > 0);
 
       this.cdr.detectChanges(); // Actualizar la vista
     }, 20); // Velocidad del movimiento del mapa
   }
-
-  coins: { position: { x: number, y: number } }[] = [];
 
   spawnElements() {
     const spawnInterval = setInterval(() => {
@@ -154,8 +159,13 @@ export class GameComponent implements OnInit {
         return;
       }
 
+      // Ensure no more than 2 coins are present at a time
+      if (this.coins.length >= 2) {
+        return;
+      }
+
       const screenWidth = window.innerWidth;
-      const randomY = 80; // Fixed height for coins
+      const randomY = 80; // Fixed height for platforms
 
       // Function to check if the new enemy position is valid
       const isValidPosition = (x: number) => {
@@ -206,8 +216,8 @@ export class GameComponent implements OnInit {
       }
 
       // Generar una moneda en una posición aleatoria
-      const coinY = 80; // Fixed height for coins
-      const coin = { position: { x: coinX, y: coinY } };
+      const coinY = 50; // Adjusted height for coins to match character jump height
+      const coin = { position: { x: screenWidth, y: coinY } };
       this.coins.push(coin);
       this.collisionSystem.createCircle(coin.position, 10);
 
@@ -216,10 +226,6 @@ export class GameComponent implements OnInit {
       this.cdr.detectChanges(); // Actualizar la vista
     }, Math.random() * 3000 + 1000); // Random interval between 1 and 4 seconds
   }
-
-
-
-
 
   updateScore() {
     const scoreInterval = setInterval(() => {
@@ -273,8 +279,9 @@ export class GameComponent implements OnInit {
       const coinBody = this.collisionSystem.createCircle(coin.position, 10);
       if (this.collisionSystem.checkOne(this.characterBody, (response) => {
         if (response.b === coinBody) {
-          this.score += 10;
+          this.score += 10; // Increase score by 10
           this.coins.splice(index, 1); // Remove the coin from the array
+          console.log('Score:', this.score); // Log the score
         }
       })) {
         return;
