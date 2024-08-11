@@ -9,4 +9,4 @@ export const API_URL = `${PROTOCOLO}://${BASE_URL}:${API_PORT}`;
 export const wsURL = `ws://${BASE_URL}:${API_PORT}/wss`;
 
 // Version
-export const VERSIONTEXT = "beta angular-plataformas | v.0.0.2"
+export const VERSIONTEXT = "beta angular-plataformas | v.0.0.4"

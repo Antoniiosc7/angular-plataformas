@@ -1,9 +1,10 @@
 import {ChangeDetectorRef, Component, HostListener, OnInit} from '@angular/core';
-import {MapComponent} from "../map/map.component";
-import {GameOverPopupComponent} from "../../components/game-over-popup/game-over-popup.component";
+import {MapComponent} from "./map.component";
+import {GameOverPopupComponent} from "../components/game-over-popup/game-over-popup.component";
 import { MatDialog } from '@angular/material/dialog';
 import { System, Box, Circle } from 'detect-collisions';
-import {PausePopupComponent} from "../../components/pause-popup/pause-popup.component";
+import {PausePopupComponent} from "../components/pause-popup/pause-popup.component";
+import {UTILS} from "../../utils";
 
 @Component({
   selector: 'app-game',
@@ -11,17 +12,35 @@ import {PausePopupComponent} from "../../components/pause-popup/pause-popup.comp
   imports: [
     MapComponent
   ],
-  templateUrl: './game.component.html',
-  styleUrls: ['./game.component.css']
+  template: `
+    <div class="score">Score: {{ score }}</div>
+    <app-map [characterPosition]="characterPosition" [enemies]="enemies" [blocks]="blocks" [circularEnemies]="circularEnemies" [coins]="coins"></app-map>
+  `,
+  styles: [`
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    .score {
+      margin-top: 30px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      color: white;
+      background-color: black;
+      padding: 5px;
+      font-family: 'Press Start 2P', cursive;
+      z-index: 10; /* Ensure the score is above the map */
+    }
+  `]
 })
 export class GameComponent implements OnInit {
-  characterPosition = { x: 200, y: 100 }; // Posición centrada del personaje
-  gravity = 1;
-  velocityY = 0; // Velocidad vertical
+  characterPosition = UTILS.PLAYER_POSITION;
+  gravity = UTILS.GRAVITY;
+  velocityY = UTILS.VELOCITYY;
   isJumping = false;
-  groundLevel = 0; // Nivel del suelo
-  gameSpeed = 5; // Velocidad del movimiento del mapa
-  mapOffset = 0; // Desplazamiento del mapa
+  groundLevel = UTILS.GROUNDLEVEL;
+  gameSpeed = UTILS.GAMESPEED;
+  mapOffset = UTILS.MAPOFFSET;
   score = 0; // Puntuación del juego
   private isPaused = false;
   private isGameOver = false;
@@ -78,11 +97,10 @@ export class GameComponent implements OnInit {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowUp' || event.key === 'Space') {
+    if (event.key === 'ArrowUp' || event.key === ' ') {
       this.jump();
     } else if (event.key === 'Escape') {
       this.pauseGame();
-
     }
     this.cdr.detectChanges(); // Forzar detección de cambios
   }
@@ -270,7 +288,7 @@ export class GameComponent implements OnInit {
       }
       this.score++;
       this.cdr.detectChanges(); // Actualizar la vista
-    }, 1000); // Incrementar la puntuación cada segundo
+    }, UTILS.TIMESPECS.SCOREINCREMENT); // Incrementar la puntuación cada segundo
   }
 
   resetGame() {

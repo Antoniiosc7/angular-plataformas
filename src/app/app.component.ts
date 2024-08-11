@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {GameComponent} from "./gameLogic/game/game.component";
+import {GameComponent} from "./gameLogic/game.component";
 import {MiniHeaderComponent} from "./components/mini-header/mini-header.component";
 
 @Component({
