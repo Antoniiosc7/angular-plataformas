@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {GameComponent} from "../../gameLogic/game/game.component";
+import {GameComponent} from "../../gameLogic/game.component";
 
 @Component({
   selector: 'app-play',
