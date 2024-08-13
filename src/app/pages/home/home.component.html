@@ -6,4 +6,12 @@
     <button (click)="startGame()">Jugar</button>
     <!-- <button (click)="goToOptions()">Opciones</button> -->
   </div>
+  <div class="top-scores">
+    <h2>Top 10 Usuarios</h2>
+    <ul>
+      <li *ngFor="let user of topUsers">
+        {{ user.username }}: {{ user.score }}
+      </li>
+    </ul>
+  </div>
 </div>

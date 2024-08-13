@@ -39,3 +39,21 @@ button:hover {
   margin: 0 auto 20px;
   max-width: 100px;
 }
+.top-scores {
+  margin-top: 20px;
+}
+
+.top-scores h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.top-scores ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.top-scores li {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
