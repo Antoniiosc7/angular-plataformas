@@ -1,9 +1,14 @@
 <div class="popup-backdrop" (click)="closePopup()"></div>
 <div class="popup">
   <h2>¡Has perdido!</h2>
+  <p>Tu puntuación: {{ score }}</p>
   <p>¿Qué te gustaría hacer?</p>
   <div class="buttons">
     <button (click)="goToHome()">Volver al inicio</button>
     <button (click)="restartGame()">Volver a empezar</button>
+  </div>
+  <div class="save-score">
+    <input type="text" [(ngModel)]="userName" placeholder="Introduce tu nombre" />
+    <button (click)="saveScore()">Guardar</button>
   </div>
 </div>

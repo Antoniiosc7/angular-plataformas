@@ -113,7 +113,6 @@ export class GameComponent implements OnInit {
     clearInterval(this.spawnInterval);
     clearInterval(this.scoreInterval);
 
-
     const dialogRef = this.dialog.open(PausePopupComponent);
 
     dialogRef.afterClosed().subscribe(result => {
@@ -303,7 +302,9 @@ export class GameComponent implements OnInit {
       if (this.collisionSystem.checkOne(this.characterBody, (response) => {
         if (response.b === enemyBody) {
           this.isGameOver = true;
-          this.dialog.open(GameOverPopupComponent);
+          this.dialog.open(GameOverPopupComponent, {
+            data: { score: this.score }
+          });
         }
       })) {
         return;
@@ -320,7 +321,9 @@ export class GameComponent implements OnInit {
           );
           if (distance <= 25 + 25) { // 25 is the radius of the circular enemy and 25 is half the width/height of the character
             this.isGameOver = true;
-            this.dialog.open(GameOverPopupComponent);
+            this.dialog.open(GameOverPopupComponent, {
+              data: { score: this.score }
+            });
           }
         }
       })) {

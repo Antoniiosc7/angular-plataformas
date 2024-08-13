@@ -49,3 +49,17 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+.save-score {
+  margin-top: 20px;
+}
+
+.save-score input {
+  padding: 5px;
+  font-size: 16px;
+}
+
+.save-score button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 16px;
+}
